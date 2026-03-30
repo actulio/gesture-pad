@@ -1,0 +1,4 @@
+module GesturePadPackageTests {
+    header "/Users/work/personal/better-touch-tool-clone/.build/arm64-apple-macosx/debug/GesturePadPackageTests.build/GesturePadPackageTests-Swift.h"
+    requires objc
+}
