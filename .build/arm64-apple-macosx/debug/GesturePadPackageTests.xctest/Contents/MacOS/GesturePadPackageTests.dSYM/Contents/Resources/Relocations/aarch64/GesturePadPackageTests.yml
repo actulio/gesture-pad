@@ -1,5 +1,0 @@
----
-triple:          'arm64-apple-darwin'
-binary-path:     '/Users/work/personal/better-touch-tool-clone/.build/arm64-apple-macosx/debug/GesturePadPackageTests.xctest/Contents/MacOS/GesturePadPackageTests'
-relocations:     []
-...
