@@ -16,7 +16,7 @@ struct SwipeRecognizer: Sendable {
     mutating func process(_ event: TouchEvent) -> RecognizedGesture? {
         switch state {
         case .idle:
-            if event.phase == .began && event.fingerCount == requiredFingers {
+            if (event.phase == .began || event.phase == .moved) && event.fingerCount == requiredFingers {
                 state = .tracking(startPoints: event.points)
             }
             return nil

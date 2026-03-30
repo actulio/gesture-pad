@@ -1,0 +1,142 @@
+<h2>Settings Window — Scalable Design</h2>
+<p class="subtitle">How the layout adapts from 3 gestures to many</p>
+
+<div class="split">
+
+  <!-- Current: 3 gestures -->
+  <div class="mockup">
+    <div class="mockup-header">Now — 3 Gestures</div>
+    <div class="mockup-body" style="padding: 0; font-family: -apple-system, system-ui, sans-serif; background: #1c1c1e;">
+
+      <!-- Window chrome -->
+      <div style="padding: 12px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #2c2c2e;">
+        <div style="display: flex; gap: 6px;">
+          <span style="width: 12px; height: 12px; border-radius: 50%; background: #ff453a; display: inline-block;"></span>
+          <span style="width: 12px; height: 12px; border-radius: 50%; background: #ffd60a; display: inline-block;"></span>
+          <span style="width: 12px; height: 12px; border-radius: 50%; background: #30d158; display: inline-block;"></span>
+        </div>
+        <span style="color: #86868b; font-size: 13px; flex: 1; text-align: center;">GesturePad Settings</span>
+      </div>
+
+      <div style="padding: 16px 20px 8px 20px;">
+        <div style="color: #86868b; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600;">Gesture Mappings</div>
+      </div>
+
+      <!-- No search bar — too few items -->
+      <div style="margin: 0 12px; background: #2c2c2e; border-radius: 10px; overflow: hidden;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; padding: 12px 16px; border-bottom: 1px solid #3a3a3c; align-items: center;">
+          <div>
+            <div style="color: #f5f5f7; font-size: 13px; font-weight: 500;">3-Finger Tap</div>
+            <div style="color: #86868b; font-size: 11px; margin-top: 3px;">Tap with three fingers</div>
+          </div>
+          <div style="background: #1c1c1e; border: 1px solid #3a3a3c; border-radius: 7px; padding: 6px 10px; color: #f5f5f7; font-size: 12px; display: flex; justify-content: space-between;">
+            <span>🖱️ Middle Click</span><span style="color: #636366; font-size: 10px;">▾</span>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; padding: 12px 16px; border-bottom: 1px solid #3a3a3c; align-items: center;">
+          <div>
+            <div style="color: #f5f5f7; font-size: 13px; font-weight: 500;">3-Finger Swipe →</div>
+            <div style="color: #86868b; font-size: 11px; margin-top: 3px;">Swipe right</div>
+          </div>
+          <div style="background: #1c1c1e; border: 1px solid #3a3a3c; border-radius: 7px; padding: 6px 10px; color: #f5f5f7; font-size: 12px; display: flex; justify-content: space-between;">
+            <span>⌨️ ⌘ Tab</span><span style="color: #636366; font-size: 10px;">▾</span>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; padding: 12px 16px; align-items: center;">
+          <div>
+            <div style="color: #f5f5f7; font-size: 13px; font-weight: 500;">3-Finger Swipe ←</div>
+            <div style="color: #86868b; font-size: 11px; margin-top: 3px;">Swipe left</div>
+          </div>
+          <div style="background: #1c1c1e; border: 1px solid #3a3a3c; border-radius: 7px; padding: 6px 10px; color: #f5f5f7; font-size: 12px; display: flex; justify-content: space-between;">
+            <span>⌨️ ⌘⇧ Tab</span><span style="color: #636366; font-size: 10px;">▾</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding: 12px 20px; text-align: center; color: #636366; font-size: 11px;">
+        No search needed — all gestures visible
+      </div>
+    </div>
+  </div>
+
+  <!-- Future: many gestures -->
+  <div class="mockup">
+    <div class="mockup-header">Future — Many Gestures</div>
+    <div class="mockup-body" style="padding: 0; font-family: -apple-system, system-ui, sans-serif; background: #1c1c1e;">
+
+      <!-- Window chrome -->
+      <div style="padding: 12px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #2c2c2e;">
+        <div style="display: flex; gap: 6px;">
+          <span style="width: 12px; height: 12px; border-radius: 50%; background: #ff453a; display: inline-block;"></span>
+          <span style="width: 12px; height: 12px; border-radius: 50%; background: #ffd60a; display: inline-block;"></span>
+          <span style="width: 12px; height: 12px; border-radius: 50%; background: #30d158; display: inline-block;"></span>
+        </div>
+        <span style="color: #86868b; font-size: 13px; flex: 1; text-align: center;">GesturePad Settings</span>
+      </div>
+
+      <div style="padding: 16px 20px 8px 20px;">
+        <div style="color: #86868b; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600;">Gesture Mappings</div>
+      </div>
+
+      <!-- Search bar appears when > N gestures -->
+      <div style="margin: 4px 12px 8px 12px;">
+        <div style="background: #2c2c2e; border: 1px solid #3a3a3c; border-radius: 8px; padding: 7px 12px; display: flex; align-items: center; gap: 8px;">
+          <span style="color: #636366; font-size: 13px;">🔍</span>
+          <span style="color: #636366; font-size: 13px;">Filter gestures…</span>
+        </div>
+      </div>
+
+      <!-- Scrollable list -->
+      <div style="margin: 0 12px; background: #2c2c2e; border-radius: 10px; overflow: hidden; max-height: 260px; overflow-y: auto;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; padding: 10px 16px; border-bottom: 1px solid #3a3a3c; align-items: center;">
+          <div><div style="color: #f5f5f7; font-size: 13px; font-weight: 500;">3-Finger Tap</div></div>
+          <div style="background: #1c1c1e; border: 1px solid #3a3a3c; border-radius: 7px; padding: 5px 10px; color: #f5f5f7; font-size: 12px;">🖱️ Middle Click</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; padding: 10px 16px; border-bottom: 1px solid #3a3a3c; align-items: center;">
+          <div><div style="color: #f5f5f7; font-size: 13px; font-weight: 500;">3-Finger Swipe →</div></div>
+          <div style="background: #1c1c1e; border: 1px solid #3a3a3c; border-radius: 7px; padding: 5px 10px; color: #f5f5f7; font-size: 12px;">⌨️ ⌘ Tab</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; padding: 10px 16px; border-bottom: 1px solid #3a3a3c; align-items: center;">
+          <div><div style="color: #f5f5f7; font-size: 13px; font-weight: 500;">3-Finger Swipe ←</div></div>
+          <div style="background: #1c1c1e; border: 1px solid #3a3a3c; border-radius: 7px; padding: 5px 10px; color: #f5f5f7; font-size: 12px;">⌨️ ⌘⇧ Tab</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; padding: 10px 16px; border-bottom: 1px solid #3a3a3c; align-items: center;">
+          <div><div style="color: #f5f5f7; font-size: 13px; font-weight: 500;">4-Finger Swipe ↑</div></div>
+          <div style="background: #1c1c1e; border: 1px solid #3a3a3c; border-radius: 7px; padding: 5px 10px; color: #86868b; font-size: 12px; font-style: italic;">Not configured</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; padding: 10px 16px; border-bottom: 1px solid #3a3a3c; align-items: center;">
+          <div><div style="color: #f5f5f7; font-size: 13px; font-weight: 500;">4-Finger Swipe ↓</div></div>
+          <div style="background: #1c1c1e; border: 1px solid #3a3a3c; border-radius: 7px; padding: 5px 10px; color: #86868b; font-size: 12px; font-style: italic;">Not configured</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; padding: 10px 16px; border-bottom: 1px solid #3a3a3c; align-items: center;">
+          <div><div style="color: #f5f5f7; font-size: 13px; font-weight: 500;">2-Finger Rotate</div></div>
+          <div style="background: #1c1c1e; border: 1px solid #3a3a3c; border-radius: 7px; padding: 5px 10px; color: #f5f5f7; font-size: 12px;">⌨️ ⌘ Z</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; padding: 10px 16px; border-bottom: 1px solid #3a3a3c; align-items: center;">
+          <div><div style="color: #f5f5f7; font-size: 13px; font-weight: 500;">5-Finger Tap</div></div>
+          <div style="background: #1c1c1e; border: 1px solid #3a3a3c; border-radius: 7px; padding: 5px 10px; color: #f5f5f7; font-size: 12px;">🖥️ Show Desktop</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; padding: 10px 16px; align-items: center;">
+          <div><div style="color: #f5f5f7; font-size: 13px; font-weight: 500;">4-Finger Pinch</div></div>
+          <div style="background: #1c1c1e; border: 1px solid #3a3a3c; border-radius: 7px; padding: 5px 10px; color: #f5f5f7; font-size: 12px;">🚀 Launchpad</div>
+        </div>
+      </div>
+
+      <!-- Scroll indicator -->
+      <div style="padding: 6px 20px; text-align: center; color: #48484a; font-size: 11px;">
+        ↕ Scrollable • Search bar auto-shows when ≥ 6 gestures
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top: 20px;">
+  <h3>Design approach</h3>
+  <ul style="color: #d1d5db; line-height: 1.8; font-size: 14px;">
+    <li><strong>Search bar:</strong> hidden by default, auto-appears when gesture count ≥ 6 (threshold configurable)</li>
+    <li><strong>Scroll:</strong> gesture list is always in a ScrollView — invisible when few, natural when many</li>
+    <li><strong>Same component:</strong> both states use the same SwiftUI List — no conditional layouts</li>
+    <li><strong>For v1:</strong> we ship the "Now" version — the scroll and search are just SwiftUI List properties we turn on later</li>
+  </ul>
+</div>

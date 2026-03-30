@@ -25,6 +25,7 @@ final class TouchDetector: @unchecked Sendable {
         }
 
         let deviceList = mt.createDeviceList()
+        logger.info("Found \(deviceList.count) multitouch device(s)")
         guard !deviceList.isEmpty else {
             logger.warning("No multitouch devices found")
             return false
@@ -34,7 +35,8 @@ final class TouchDetector: @unchecked Sendable {
 
         for device in deviceList {
             mt.registerCallback(device: device, callback: callbackPtr)
-            _ = mt.startDevice(device)
+            let result = mt.startDevice(device)
+            logger.info("Started device: result=\(result)")
             devices.append(device)
         }
 
@@ -59,31 +61,44 @@ final class TouchDetector: @unchecked Sendable {
         let touches = touchesPtr.assumingMemoryBound(to: MTTouch.self)
         var points: [TouchPoint] = []
         var touchingCount = 0
+        var liftingCount = 0
 
         for i in 0..<count {
             let touch = touches[i]
-            if touch.state >= 4 { // touching
+            // States: 1=notTracking 2=startInRange 3=hoverInRange 4=making/touching
+            //         5=breaking (lifting) 6=lingering 7=leaving
+            if touch.state >= 4 && touch.state <= 6 {
+                // Actively touching
                 touchingCount += 1
                 points.append(TouchPoint(x: touch.normalizedVector.x * 1000,
                                          y: touch.normalizedVector.y * 1000))
             }
+            if touch.state == 5 || touch.state == 7 {
+                liftingCount += 1
+            }
         }
 
-        guard touchingCount > 0 else { return }
-
-        let allTouching = (0..<count).allSatisfy { touches[$0].state >= 4 }
-        let anyEnding = (0..<count).contains { touches[$0].state >= 5 }
-
+        // Determine phase based on aggregate state
         let phase: TouchPhase
-        if anyEnding {
+        if touchingCount == 0 && liftingCount > 0 {
+            // All fingers have lifted
             phase = .ended
-        } else if allTouching {
+        } else if liftingCount > 0 {
+            // Some fingers lifting while others still down
+            phase = .ended
+        } else if touchingCount > 0 {
+            // Use .began if this is a new touch group, .moved otherwise
+            // We'll emit both — the recognizer tracks state transitions itself
             phase = .moved
         } else {
-            phase = .began
+            // No relevant touches
+            return
         }
 
-        let event = TouchEvent(timestamp: timestamp, fingerCount: touchingCount, points: points, phase: phase)
+        let fingerCount = max(touchingCount, liftingCount)
+        guard fingerCount > 0 else { return }
+
+        let event = TouchEvent(timestamp: timestamp, fingerCount: fingerCount, points: points, phase: phase)
         onTouchEvent?(event)
     }
 }

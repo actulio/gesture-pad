@@ -8,6 +8,7 @@ final class GestureEngine: @unchecked Sendable {
     private let actionExecutor = ActionExecutor()
     private var gestureRecognizer = GestureRecognizer()
     private let logger = Logger(subsystem: "com.gesturepad", category: "GestureEngine")
+    private var eventCount = 0
 
     var isDetecting = false
     var trackpadAvailable: Bool { TouchDetector.shared.isAvailable }
@@ -18,7 +19,12 @@ final class GestureEngine: @unchecked Sendable {
     }
 
     func start() {
-        guard configStore.isEnabled else { return }
+        guard configStore.isEnabled else {
+            NSLog("[GesturePad] Engine not starting: isEnabled=false")
+            return
+        }
+
+        NSLog("[GesturePad] Starting gesture engine...")
 
         TouchDetector.shared.onTouchEvent = { [weak self] event in
             self?.handleTouchEvent(event)
@@ -26,9 +32,9 @@ final class GestureEngine: @unchecked Sendable {
 
         isDetecting = TouchDetector.shared.start()
         if isDetecting {
-            logger.info("Gesture engine started")
+            NSLog("[GesturePad] ✅ Gesture engine started successfully")
         } else {
-            logger.error("Failed to start gesture engine")
+            NSLog("[GesturePad] ❌ Failed to start gesture engine")
         }
     }
 
@@ -41,9 +47,14 @@ final class GestureEngine: @unchecked Sendable {
     private func handleTouchEvent(_ event: TouchEvent) {
         guard configStore.isEnabled else { return }
 
+        eventCount += 1
+        if eventCount <= 10 || eventCount % 50 == 0 {
+            NSLog("[GesturePad] Touch #%d: fingers=%d phase=%@ points=%d", eventCount, event.fingerCount, String(describing: event.phase), event.points.count)
+        }
+
         if let gesture = gestureRecognizer.process(event),
            let action = actionMapper.action(for: gesture) {
-            logger.debug("Recognized \(String(describing: gesture)) → executing \(String(describing: action))")
+            NSLog("[GesturePad] 🎯 Gesture → Action: %@ → %@", String(describing: gesture), String(describing: action))
             actionExecutor.execute(action)
         }
     }

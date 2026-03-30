@@ -1,4 +1,7 @@
 import Foundation
+import os
+
+private let tapLogger = Logger(subsystem: "com.gesturepad", category: "TapRecognizer")
 
 struct TapRecognizer: Sendable {
     private enum State {
@@ -9,41 +12,54 @@ struct TapRecognizer: Sendable {
 
     private var state: State = .idle
 
-    private let maxDuration: TimeInterval = 0.2
-    private let maxDisplacement: Float = 5.0
+    // Tolerant thresholds for real trackpad use
+    private let maxDuration: TimeInterval = 0.4    // 400ms — real 3-finger taps take ~200-350ms
+    private let maxDisplacement: Float = 50.0      // on 0-1000 scale = 5% of trackpad
     private let requiredFingers = 3
 
     mutating func process(_ event: TouchEvent) -> RecognizedGesture? {
         switch state {
         case .idle:
-            if event.phase == .began && event.fingerCount == requiredFingers {
+            // Start tracking when 3 fingers touch simultaneously
+            if event.fingerCount >= requiredFingers && event.phase == .moved {
                 state = .fingersDown(startTime: event.timestamp, startPoints: event.points)
+                tapLogger.debug("3-finger touch started")
             }
             return nil
 
         case .fingersDown(let startTime, let startPoints):
-            if event.phase == .moved {
+            // Still touching — check for excessive movement
+            if event.phase == .moved && event.fingerCount >= requiredFingers {
                 if displacement(from: startPoints, to: event.points) > maxDisplacement {
+                    tapLogger.debug("Tap cancelled: too much movement")
                     state = .cancelled
                 }
                 return nil
             }
-            if event.phase == .ended || event.phase == .cancelled {
+
+            // Fingers lifted
+            if event.phase == .ended {
                 let duration = event.timestamp - startTime
                 let moved = displacement(from: startPoints, to: event.points)
                 state = .idle
-                if duration <= maxDuration && moved <= maxDisplacement && event.phase == .ended {
+
+                if duration <= maxDuration && moved <= maxDisplacement {
+                    tapLogger.info("✅ 3-finger tap recognized! duration=\(duration)s")
                     return .threeFingerTap
+                } else {
+                    tapLogger.debug("Tap rejected: duration=\(duration)s displacement=\(moved)")
                 }
                 return nil
             }
-            if event.fingerCount != requiredFingers {
+
+            // Wrong finger count
+            if event.fingerCount < requiredFingers {
                 state = .cancelled
             }
             return nil
 
         case .cancelled:
-            if event.phase == .ended || event.phase == .cancelled {
+            if event.phase == .ended {
                 state = .idle
             }
             return nil
