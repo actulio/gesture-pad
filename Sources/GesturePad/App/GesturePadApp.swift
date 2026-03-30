@@ -9,29 +9,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSLog("[GesturePad] applicationDidFinishLaunching")
 
-        // Delay slightly to let the run loop settle
+        // Start the engine immediately — MultitouchSupport does NOT need accessibility.
+        // (Accessibility is only needed for posting CGEvents like middle-click.)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [self] in
             let isAccessible = AXIsProcessTrusted()
             NSLog("[GesturePad] Accessibility trusted: %@", isAccessible ? "YES" : "NO")
+            NSLog("[GesturePad] Note: touch detection works WITHOUT accessibility. Accessibility is only needed for action execution (middle-click, keyboard shortcuts).")
 
-            if isAccessible {
-                NSLog("[GesturePad] Starting engine immediately")
-                engine.start()
-            } else {
-                NSLog("[GesturePad] Prompting for accessibility")
-                // Prompt for accessibility
+            // Always start the engine for touch detection
+            engine.start()
+
+            if !isAccessible {
+                NSLog("[GesturePad] Prompting for accessibility (needed for actions)")
                 let key = "AXTrustedCheckOptionPrompt" as CFString
                 let options = [key: kCFBooleanTrue!] as CFDictionary
                 AXIsProcessTrustedWithOptions(options)
-
-                // Poll until granted
-                Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] timer in
-                    if AXIsProcessTrusted() {
-                        timer.invalidate()
-                        NSLog("[GesturePad] Accessibility granted via polling — starting engine")
-                        self?.engine.start()
-                    }
-                }
             }
         }
     }
@@ -48,9 +40,9 @@ struct GesturePadApp: App {
         .menuBarExtraStyle(.window)
 
         Window("GesturePad Settings", id: "settings") {
-            SettingsView(configStore: appDelegate.engine.configStore)
+            SettingsView(engine: appDelegate.engine)
         }
-        .defaultSize(width: 500, height: 350)
+        .defaultSize(width: 550, height: 550)
         .windowResizability(.contentSize)
     }
 }

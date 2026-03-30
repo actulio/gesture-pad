@@ -2,38 +2,35 @@ import Foundation
 
 // C-level types from MultitouchSupport.framework (private)
 
-struct MTVector2 {
+struct MTPoint {
     var x: Float
     var y: Float
+}
+
+// MTVector includes both position AND velocity (critical for correct struct size!)
+struct MTVector {
+    var position: MTPoint
+    var velocity: MTPoint
 }
 
 struct MTTouch {
     var frame: Int32
     var timestamp: Double
-    var identifier: Int32
-    var state: Int32           // 1=notTracking 2=startInRange 3=hoverInRange 4=touching 5=outOfRange
+    var identifier: Int32       // pathIndex / transducerIndex
+    var state: Int32            // MTTouchState: 1=notTracking 2=startInRange 3=hoverInRange 4=touching 5=breaking 6=lingering 7=leaving
     var fingerID: Int32
     var handID: Int32
-    var normalizedVector: MTVector2     // position 0..1
-    var zTotal: Float
+    var normalizedVector: MTVector     // position (0..1) + velocity
+    var zTotal: Float                  // pressure/quality 0..1
     var unused3: Int32
     var angle: Float
     var majorAxis: Float
     var minorAxis: Float
-    var absoluteVector: MTVector2       // absolute position
+    var absoluteVector: MTVector       // absolute position (mm) + velocity
     var unused4: Int32
     var unused5: Int32
     var zDensity: Float
 }
-
-// Use raw pointer types for C convention compatibility
-typealias MTContactCallbackRaw = @convention(c) (
-    Int32,                              // device (as int, reinterpreted)
-    UnsafeRawPointer,                   // touches pointer
-    Int32,                              // touch count
-    Double,                             // timestamp
-    Int32                               // frame
-) -> Void
 
 // Dynamically loaded function pointers — use UnsafeMutableRawPointer for device refs
 final class MultitouchFunctions: @unchecked Sendable {
@@ -43,39 +40,66 @@ final class MultitouchFunctions: @unchecked Sendable {
 
     private init() {
         handle = dlopen("/System/Library/PrivateFrameworks/MultitouchSupport.framework/MultitouchSupport", RTLD_NOW)
+        if handle != nil {
+            NSLog("[GesturePad] MultitouchSupport.framework loaded successfully")
+        } else {
+            NSLog("[GesturePad] FAILED to load MultitouchSupport.framework")
+        }
     }
 
     var isAvailable: Bool { handle != nil }
 
     func deviceCount() -> Int32 {
-        guard let handle,
-              let sym = dlsym(handle, "MTDeviceCountDevices") else { return 0 }
-        let fn = unsafeBitCast(sym, to: (@convention(c) () -> Int32).self)
-        return fn()
+        guard let handle else { return 0 }
+        // First try the list-based approach (more reliable)
+        let devices = createDeviceList()
+        return Int32(devices.count)
     }
 
+    /// MTDeviceCreateList() -> CFArrayRef
+    /// Takes NO arguments, returns a CFArray of device references
     func createDeviceList() -> [UnsafeMutableRawPointer] {
-        guard let handle else { return [] }
-        let count = deviceCount()
-        guard count > 0 else { return [] }
+        guard let handle else {
+            NSLog("[GesturePad] createDeviceList: no handle")
+            return []
+        }
 
-        guard let sym = dlsym(handle, "MTDeviceCreateList") else { return [] }
-        let fn = unsafeBitCast(sym, to: (@convention(c) (UnsafeMutableRawPointer, Int32) -> Int32).self)
+        guard let sym = dlsym(handle, "MTDeviceCreateList") else {
+            NSLog("[GesturePad] createDeviceList: symbol not found")
+            return []
+        }
 
-        let buffer = UnsafeMutableBufferPointer<UnsafeMutableRawPointer?>.allocate(capacity: Int(count))
-        buffer.initialize(repeating: nil)
-        defer { buffer.deallocate() }
+        // Correct signature: () -> Unmanaged<CFArray>?
+        let fn = unsafeBitCast(sym, to: (@convention(c) () -> CFArray?).self)
+        
+        guard let cfArray = fn() else {
+            NSLog("[GesturePad] createDeviceList: MTDeviceCreateList() returned nil")
+            return []
+        }
 
-        _ = fn(buffer.baseAddress!, count)
+        let nsArray = cfArray as NSArray
+        NSLog("[GesturePad] createDeviceList: got %d device(s) from CFArray", nsArray.count)
 
-        return buffer.compactMap { $0 }
+        var devices: [UnsafeMutableRawPointer] = []
+        for i in 0..<nsArray.count {
+            // Each element is a MTDeviceRef (opaque pointer)
+            let obj = nsArray[i]
+            let ptr = Unmanaged.passUnretained(obj as AnyObject).toOpaque()
+            devices.append(UnsafeMutableRawPointer(mutating: ptr))
+        }
+        
+        return devices
     }
 
     func registerCallback(device: UnsafeMutableRawPointer, callback: UnsafeMutableRawPointer) {
         guard let handle,
-              let sym = dlsym(handle, "MTRegisterContactFrameCallback") else { return }
+              let sym = dlsym(handle, "MTRegisterContactFrameCallback") else {
+            NSLog("[GesturePad] registerCallback: symbol not found")
+            return
+        }
         let fn = unsafeBitCast(sym, to: (@convention(c) (UnsafeMutableRawPointer, UnsafeMutableRawPointer) -> Void).self)
         fn(device, callback)
+        NSLog("[GesturePad] Registered callback for device")
     }
 
     func unregisterCallback(device: UnsafeMutableRawPointer, callback: UnsafeMutableRawPointer) {
@@ -87,7 +111,10 @@ final class MultitouchFunctions: @unchecked Sendable {
 
     func startDevice(_ device: UnsafeMutableRawPointer) -> Int32 {
         guard let handle,
-              let sym = dlsym(handle, "MTDeviceStart") else { return -1 }
+              let sym = dlsym(handle, "MTDeviceStart") else {
+            NSLog("[GesturePad] startDevice: symbol not found")
+            return -1
+        }
         let fn = unsafeBitCast(sym, to: (@convention(c) (UnsafeMutableRawPointer, Int32) -> Int32).self)
         return fn(device, 0)
     }
