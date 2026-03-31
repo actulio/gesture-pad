@@ -1,1 +1,20 @@
+# Build artifacts
+.build/
+.swiftpm/
+*.xcodeproj/
+DerivedData/
+
+# App bundles (built output)
+*.app/
+
+# Generated assets
+Icon.icns
+
+# macOS
+.DS_Store
+
+# Agent/AI tooling
+.agents/
+.claude/
 .superpowers/
+skills-lock.json
